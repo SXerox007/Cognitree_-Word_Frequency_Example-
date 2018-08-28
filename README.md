@@ -15,3 +15,15 @@ Most frequent
 Least frequent
 (an:1), (are:1), (by:1)
 
+
+
+How to Run:-
+Enter the javac with the name of the file i.e WordFrequency
+Javac WordFrequency.java
+Then Enter java with then file name and one command line arrgument
+e.g. java WordFrequency /Users/sumitthakur/Desktop/SpaceProbe.txt
+
+ /Users/sumitthakur/Desktop/SpaceProbe.txt -----> path of the text file that can be any.
+ 
+ Thanks and Happy Coding.
+ 
