@@ -25,25 +25,27 @@ public class WordFrequency implements Constants{
     private Scanner sc;
     private HashMap<String,Integer> wordList;
     private Pattern p = Pattern.compile("[a-zA-Z]+");
-    private int i=0;
+    private String pathOfFile;
+    private boolean flag;
     
     private void init(){
         print(INPUT_ENTER_WORD_FREQUENCY);
         sc = new Scanner(System.in);
         n=sc.nextInt();
+        print(INPUT_ENTER_THE_PATH);
+        pathOfFile = sc.next();
         maxArrayList = new ArrayList<>(n);
         minArrayList = new ArrayList<>(n);
         wordList = new HashMap<>();
     }
     
-    
-    private boolean isPathOfFileCorrect(String pathOfFile){
+    private boolean isPathOfFileCorrect(){
         Path path = Paths.get(pathOfFile);
         return Files.exists(path);
     }
     
-    private void validatorAndExtractorFile(String pathOfFile){
-        if(isPathOfFileCorrect(pathOfFile)){
+    private void validatorAndExtractorFile(){
+        if(isPathOfFileCorrect()){
             fetchData(pathOfFile);
         }else{
             print(ERROR_PATH_NOT_FOUND);
@@ -64,10 +66,21 @@ public class WordFrequency implements Constants{
             print(e.getMessage());
         }
         
-        LinkedHashMap<String, Integer> temp = sortHashMapByValues(wordList);
-        //print(temp.toString());
-        //print(String.valueOf(temp.size()));
-        seprateMostAndLessFrequentWords(temp);
+        printValues(valueAddBySortingOrder(wordList));
+    }
+    
+    
+    private void printValues(ArrayList<WordFrequencyModel> sortedArrayList){
+        
+        print(MOST_FREQUENT);
+        for(int i=0;i<n;i++){
+            printFrequentWords(sortedArrayList.get(i).getWord(),sortedArrayList.get(i).getRepetation());
+        }
+        print("\n");
+        print(LEAST_FREQUENT);
+        for(int i=(sortedArrayList.size()-n);i<sortedArrayList.size();i++){
+            printFrequentWords(sortedArrayList.get(i).getWord(),sortedArrayList.get(i).getRepetation());
+        }
     }
     
     
@@ -86,46 +99,6 @@ public class WordFrequency implements Constants{
         }
     }
     
-    private void mostFrequentWord(){
-        print(MOST_FREQUENT);
-        for(int i=maxArrayList.size()-1;i>=0;i--){
-            printFrequentWords(maxArrayList.get(i).getWord(),maxArrayList.get(i).getRepetation());
-        }
-        leastFrequentWord();
-    }
-    
-    
-    private void leastFrequentWord(){
-        print("\n");
-        print(LEAST_FREQUENT);
-        for(int i=0;i<minArrayList.size();i++){
-            printFrequentWords(minArrayList.get(i).getWord(),minArrayList.get(i).getRepetation());
-        }
-    }
-    
-    
-    private void seprateMostAndLessFrequentWords(LinkedHashMap<String, Integer> sortedValues){
-        int temp = sortedValues.size()-n;
-        sortedValues.forEach((key,value) -> {
-            if(temp<=i){
-                WordFrequencyModel wordFrequencyModel = new WordFrequencyModel();
-                wordFrequencyModel.setWord(key);
-                wordFrequencyModel.setRepetation(value);
-                maxArrayList.add(wordFrequencyModel);
-               // printFrequentWords(key,value);
-            }else if(i<n){
-                WordFrequencyModel wordFrequencyModel = new WordFrequencyModel();
-                wordFrequencyModel.setWord(key);
-                wordFrequencyModel.setRepetation(value);
-                minArrayList.add(wordFrequencyModel);
-               // printFrequentWords(key,value);
-            }
-            i++;
-        });
-        
-        mostFrequentWord();
-    }
-    
     private void printFrequentWords(String key,int value){
         System.out.print("("+ key + ":" + value + ")" + ",");
     }
@@ -135,42 +108,32 @@ public class WordFrequency implements Constants{
         System.out.println(s);
     }
     
-    
-    private LinkedHashMap<String, Integer> sortHashMapByValues(HashMap<String, Integer> passedMap) {
-        List<String> mapKeys = new ArrayList<>(passedMap.keySet());
-        List<Integer> mapValues = new ArrayList<>(passedMap.values());
-        Collections.sort(mapValues);
-        Collections.sort(mapKeys);
-        
-        LinkedHashMap<String, Integer> sortedMap = new LinkedHashMap<>();
-        
-        Iterator<Integer> valueIt = mapValues.iterator();
-        while (valueIt.hasNext()) {
-            Integer val = valueIt.next();
-            Iterator<String> keyIt = mapKeys.iterator();
-            
-            while (keyIt.hasNext()) {
-                String key = keyIt.next();
-                Integer comp1 = passedMap.get(key);
-                Integer comp2 = val;
-                if (comp1.equals(comp2)) {
-                    keyIt.remove();
-                    sortedMap.put(key, val);
+    private ArrayList<WordFrequencyModel> valueAddBySortingOrder(HashMap<String,Integer> passedMap){
+        ArrayList<WordFrequencyModel> sortedArrayList = new ArrayList<>();
+        passedMap.forEach((key,value) -> {
+            flag=true;
+            WordFrequencyModel wordFrequencyModel = new WordFrequencyModel();
+            wordFrequencyModel.setRepetation(value);
+            wordFrequencyModel.setWord(key);
+            for(int i=0;i<sortedArrayList.size();i++){
+                if(sortedArrayList.get(i).getRepetation()<value){
+                    //shifting logic
+                    sortedArrayList.add(i,wordFrequencyModel);
+                    flag=false;
                     break;
                 }
             }
-        }
-        return sortedMap;
+            if(flag)
+                sortedArrayList.add(wordFrequencyModel);
+            
+        });
+                          
+        return sortedArrayList;
     }
-    
-    
+
     public static void main(String args[]){
-        WordFrequency wordFrequency = new WordFrequency();
-        if (args.length > 0){
+            WordFrequency wordFrequency = new WordFrequency();
             wordFrequency.init();
-            wordFrequency.validatorAndExtractorFile(args[0]);
-        }else{
-            wordFrequency.print(ERROR_NUMBER_OF_ARRGUMENTS);
-        }
+            wordFrequency.validatorAndExtractorFile();
     }
 }
